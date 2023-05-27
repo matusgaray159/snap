@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600&family=Roboto&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+html {
+  font-size: $html-font-size;
+}
+
+body {
+  min-height: 100vh;
+  color: $c-text;
+  background: $c-primary;
+  transition: color 0.5s, background-color 0.5s;
+  line-height: 1.6;
+  font-family: 'Fredoka', sans-serif;
+  font-size: rem(16);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: unset;
+  text-decoration: none;
+  transition: color 0.5s;
+}
