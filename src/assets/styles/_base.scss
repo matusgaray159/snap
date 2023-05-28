@@ -8,10 +8,6 @@
   font-weight: normal;
 }
 
-html {
-  font-size: $html-font-size;
-}
-
 body {
   min-height: 100vh;
   color: $c-text;
@@ -25,8 +21,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+strong {
+  font-weight: 600;
+}
+
 a {
   color: unset;
   text-decoration: none;
   transition: color 0.5s;
+}
+
+button {
+  all: unset;
 }
