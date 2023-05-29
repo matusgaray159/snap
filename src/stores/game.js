@@ -1,8 +1,8 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-const apiUrl = 'https://deckofcardsapi.com/api/deck/'
+const API_URL = 'https://deckofcardsapi.com/api/deck/'
 
 export const useGameStore = defineStore('gameStore', () => {
   const deckId = ref(null)
@@ -13,20 +13,40 @@ export const useGameStore = defineStore('gameStore', () => {
   const suitMatches = ref(0)
   const remaining = ref(0)
   const gameOver = ref(false)
-
+  const isCardAnimating = ref(false)
   const error = ref(null)
 
-  const initGame = async () => {
+  const cardsRemainingMessage = computed(() => {
+    const cardWord = remaining.value === 1 ? 'card' : 'cards'
+    return `<strong>${remaining.value}</strong> ${cardWord} remaining`
+  })
+
+  const valueMatchesMessage = computed(
+    () => `Value Matches: <strong>${valueMatches.value}</strong>`
+  )
+
+  const suitMatchesMessage = computed(() => `Suit Matches: <strong>${suitMatches.value}</strong>`)
+
+  const executeApiRequest = async (request) => {
     try {
-      const { data } = await axios.get(`${apiUrl}new/shuffle/?deck_count=1`)
-      deckId.value = data.deck_id
-      remaining.value = data.remaining
+      return await request
     } catch (err) {
       error.value = err.message
+      alert(`An error occurred: ${err.message}`)
     }
   }
 
-  const checkSnap = () => {
+  const initGame = async () => {
+    const request = axios.get(`${API_URL}new/shuffle/?deck_count=1`)
+    const { data } = await executeApiRequest(request)
+
+    if (data) {
+      deckId.value = data.deck_id
+      remaining.value = data.remaining
+    }
+  }
+
+  const checkMatch = () => {
     if (previousCard.value && currentCard.value) {
       if (previousCard.value.value === currentCard.value.value) {
         snapMessage.value = 'Value Match!'
@@ -40,24 +60,32 @@ export const useGameStore = defineStore('gameStore', () => {
     }
   }
 
+  const checkGameOver = () => {
+    if (!remaining.value) {
+      gameOver.value = true
+    }
+  }
+
+  const updateCards = (newCurrentCard, cardsRemaining) => {
+    previousCard.value = currentCard.value
+    currentCard.value = newCurrentCard
+    remaining.value = cardsRemaining
+  }
+
   const drawCard = async () => {
     if (!deckId.value) {
       initGame()
     }
 
-    try {
-      const { data } = await axios.get(`${apiUrl}${deckId.value}/draw/?count=1`)
-      previousCard.value = currentCard.value
-      currentCard.value = data.cards[0]
-      remaining.value = data.remaining
+    if (!isCardAnimating.value) {
+      const request = axios.get(`${API_URL}${deckId.value}/draw/?count=1`)
+      const { data } = await executeApiRequest(request)
 
-      if (!data.remaining) {
-        gameOver.value = true
+      if (data) {
+        updateCards(data.cards[0], data.remaining)
+        checkMatch()
+        checkGameOver()
       }
-
-      checkSnap()
-    } catch (err) {
-      error.value = err.message
     }
   }
 
@@ -65,11 +93,12 @@ export const useGameStore = defineStore('gameStore', () => {
     previousCard,
     currentCard,
     snapMessage,
-    valueMatches,
-    suitMatches,
-    remaining,
     gameOver,
+    cardsRemainingMessage,
+    valueMatchesMessage,
+    suitMatchesMessage,
     initGame,
-    drawCard
+    drawCard,
+    isCardAnimating
   }
 })

@@ -9,6 +9,7 @@
 }
 
 body {
+  overflow-x: hidden;
   min-height: 100vh;
   color: $c-text;
   background: $c-primary;

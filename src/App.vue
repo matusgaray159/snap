@@ -4,7 +4,7 @@
   <main>
     <div class="game">
       <div class="game__header">
-        <p v-if="snapMessage" class="snap-message">{{ snapMessage }}</p>
+        <SnapMessage v-if="snapMessage" :message="snapMessage" />
       </div>
 
       <div class="cards">
@@ -12,18 +12,14 @@
           <Card v-if="previousCard" :card="previousCard" />
         </div>
         <div class="cards__slot">
-          <Card v-if="currentCard" :card="currentCard" />
+          <Card v-if="currentCard" :card="currentCard" :isCurrentCard="true" />
         </div>
       </div>
 
       <div class="game__footer">
         <Stats v-if="gameOver">
-          <p>
-            Value Matches: <strong>{{ valueMatches }}</strong>
-          </p>
-          <p>
-            Suit Matches: <strong>{{ suitMatches }}</strong>
-          </p>
+          <p v-html="valueMatchesMessage" />
+          <p v-html="suitMatchesMessage" />
         </Stats>
 
         <template v-else>
@@ -31,9 +27,7 @@
             <Button @click="drawCard" variant="btn--primary btn--big">Draw card</Button>
           </div>
           <Stats>
-            <p>
-              <strong>{{ remaining }}</strong> cards remaining
-            </p>
+            <p v-html="cardsRemainingMessage"></p>
           </Stats>
         </template>
       </div>
@@ -42,10 +36,7 @@
 </template>
 
 <script setup>
-import Header from './components/Header.vue'
-import Card from './components/Card.vue'
-import Button from './components/Button.vue'
-import Stats from './components/Stats.vue'
+import { SnapMessage, Header, Card, Button, Stats } from './components'
 
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -55,15 +46,22 @@ const gameStore = useGameStore()
 
 const { initGame, drawCard } = gameStore
 
-const { valueMatches, suitMatches, gameOver, remaining, previousCard, currentCard, snapMessage } =
-  storeToRefs(gameStore)
+const {
+  valueMatchesMessage,
+  suitMatchesMessage,
+  gameOver,
+  cardsRemainingMessage,
+  previousCard,
+  currentCard,
+  snapMessage
+} = storeToRefs(gameStore)
 
 onMounted(() => {
   initGame()
 })
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @use '@/assets/styles/_globals' as *;
 
 main {
@@ -102,14 +100,6 @@ main {
     @include at-least($sm) {
       min-height: rem(130);
     }
-  }
-}
-
-.snap-message {
-  font-size: rem(24);
-
-  @include at-least($sm) {
-    font-size: rem(32);
   }
 }
 
